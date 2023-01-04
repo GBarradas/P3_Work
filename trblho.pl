@@ -137,11 +137,32 @@ comando([]) :- nl,readChar.
 comando([A|AT]) :- write(A),write('|'),comando(AT).
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
-process(-1,A) :- write("Adeus| |\n|\t"),nl,write(A),nl.
-process(32,A) :- nl,name(X,A),write(X), nl, readChar([]).
-process(32,[]) :- readChar([]).
-process(C,[]) :- char_code(L,C), write(L), readChar([C]).
-process(C,T) :-  char_code(L,C), write(L),append(T,[C],X), readChar(X).
+process(-1,A) :- /*write("Adeus| |\n|\t"),*/nl.
+process(32,A) :-jogada(A), readChar([]).
+%process(32,[]) :- readChar([]).
+process(9,A) :- jogada(A), readChar([]).
+%process(9,[]) :- readChar([]).
+process(10,A) :- jogada(A), readChar([]).
+%process(10,[]) :- readChar([]).
+process(C,[]) :- readChar([C]).
+process(C,T) :- append(T,[C],X), readChar(X).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%             JOGADAS             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+get([H|_],0,H).
+get([_,T], Position, Elemento) :- NP is Position-1, get(T,NP,Elemento).
+
+
+jogada(A):- length(A, X), jogada(A,X), write('Length: '),write(A),nl.
+jogada([H|T],2) :- joga(H,T).
+jogada([P1,P2,P3],3) :-  joga(P1,P2,P3).
+jogada([P1,P2,P3,P4],4) :-  joga(P1,P2,P3,P4).
+jogada([P1,P2,P3,P4,P5],5) :-  joga(P1,P2,P3,P4,P5).
+joga(A,B). % A desenvolver
+joga(Peca,X,Y). %A desenvolver
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
