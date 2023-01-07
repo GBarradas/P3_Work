@@ -1,13 +1,13 @@
 % tipologia descritiva
-
-/*coluna('A').
+/*
+coluna('A').
 coluna('B').
 coluna('C').
 coluna('D').
 coluna('E').
 coluna('F').
 coluna('G').
-coluna('H').
+coluna('H'). 
 linha(1).
 linha(2).
 linha(3).
@@ -19,38 +19,38 @@ linha(8).
 celula(X,Y) :- coluna(X), linha(Y).*/
 
 
-posicao_inicial('PB', 'A', 2).
-posicao_inicial('PB', 'B', 2).
-posicao_inicial('PB', 'C', 2).
-posicao_inicial('PB', 'D', 2).
-posicao_inicial('PB', 'E', 2).
-posicao_inicial('PB', 'F', 2).
-posicao_inicial('PB', 'G', 2).
-posicao_inicial('PB', 'H', 2).
-posicao_inicial('TB', 'A', 1).
-posicao_inicial('HB', 'B', 1).
-posicao_inicial('BB', 'C', 1).
-posicao_inicial('KB', 'D', 1).
-posicao_inicial('QB', 'E', 1).
-posicao_inicial('BB', 'F', 1).
-posicao_inicial('HB', 'G', 1).
-posicao_inicial('TB', 'H', 1).
-posicao_inicial('PW', 'A', 7).
-posicao_inicial('PW', 'B', 7).
-posicao_inicial('PW', 'C', 7).
-posicao_inicial('PW', 'D', 7).
-posicao_inicial('PW', 'E', 7).
-posicao_inicial('PW', 'F', 7).
-posicao_inicial('PW', 'G', 7).
-posicao_inicial('PW', 'H', 7).
-posicao_inicial('TW', 'A', 8).
-posicao_inicial('HW', 'B', 8).
-posicao_inicial('BW', 'C', 8).
-posicao_inicial('KW', 'D', 8).
-posicao_inicial('QW', 'E', 8).
-posicao_inicial('BW', 'F', 8).
-posicao_inicial('HW', 'G', 8).
-posicao_inicial('TW', 'H', 8).
+posicao_inicial('PB', 'A', 7,'♙').
+posicao_inicial('PB', 'B', 7,'♙').
+posicao_inicial('PB', 'C', 7,'♙').
+posicao_inicial('PB', 'D', 7,'♙').
+posicao_inicial('PB', 'E', 7,'♙').
+posicao_inicial('PB', 'F', 7,'♙').
+posicao_inicial('PB', 'G', 7,'♙').
+posicao_inicial('PB', 'H', 7,'♙').
+posicao_inicial('RB', 'A', 8,'').
+posicao_inicial('NB', 'B', 8,'♞').
+posicao_inicial('BB', 'C', 8,'').
+posicao_inicial('QB', 'D', 8,'').
+posicao_inicial('KB', 'E', 8,'♚').
+posicao_inicial('BB', 'F', 8,'').
+posicao_inicial('NB', 'G', 8,'♞').
+posicao_inicial('RB', 'H', 8,'').
+posicao_inicial('PW', 'A', 2, '♟').
+posicao_inicial('PW', 'B', 2, '♟').
+posicao_inicial('PW', 'C', 2, '♟').
+posicao_inicial('PW', 'D', 2, '♟').
+posicao_inicial('PW', 'E', 2, '♟').
+posicao_inicial('PW', 'F', 2, '♟').
+posicao_inicial('PW', 'G', 2, '♟').
+posicao_inicial('PW', 'H', 2, '♟').
+posicao_inicial('RW', 'A', 1,'').
+posicao_inicial('NW', 'B', 1,'♘').
+posicao_inicial('BW', 'C', 1,'').
+posicao_inicial('QW', 'D', 1,'').
+posicao_inicial('KW', 'E', 1,'').
+posicao_inicial('BW', 'F', 1,'').
+posicao_inicial('NW', 'G', 1,'♘').
+posicao_inicial('RW', 'H', 1,'').
 linhas(19).
 colunas(37).
 valor(80, 100).
@@ -60,21 +60,29 @@ valor(84, 500).
 valor(81, 1000).
 valor(75, 20000).
 
+peca('Q').
+peca('K').
+peca('B').
+peca('N').
+peca('R').
+peca('P').
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %        INICIAR TABULEIRO        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-:- dynamic(posicao_act/3).
+:- dynamic(pos_act/4).
+:- dynamic(cor/1).
 
-iniciar :- (posicao_inicial(P, X, Y),\+posicao_act(P,X,Y),
-        asserta(posicao_act(P, X, Y)),iniciar);!.
+iniciar :- (posicao_inicial(P, X, Y,I),\+pos_act(P,X,Y,I),
+        asserta(pos_act(P, X, Y,I)),iniciar);!.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       DESENHAR TABULEIRO        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-jogar :- iniciar, desenhar.
+jogar :- iniciar,asserta(cor(87)), desenhar.
 
-desenhar :- desenhar_Tab(1).
+desenhar :- desenhar_Tab(1),nl.
 
 desenhar_Tab(Linha):-(linhas(Z), Linha=<Z,
         ((Y is Linha mod 2, Y=1, colunas(X), print_Linha(X), nl);
@@ -110,7 +118,7 @@ espaco_Peca(Pos, Max) :-
 ver_Peca(Y, X) :- 
         Z is round(Y/2)-1, ASCII is round(63+(X+2)/4),
         char_code(Letra,ASCII), 
-        posicao_act(Peca,Letra,Z),
+        pos_act(Peca,Letra,Z),
         write(Peca).
         
 espacoBoard(Pos, Max) :-
@@ -119,7 +127,14 @@ espacoBoard(Pos, Max) :-
 
 ver_letra(Pos, Max) :-
     Max=<10, ((Y is Pos-4*Max, Y=3, !); (MaxN is Max+1, ver_letra(Pos,MaxN))).
-
+digito(X) :- 
+        (X=1;
+        X=2;
+        X=3;
+        X=4;
+        X=5;
+        X=6;
+        X=7).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          INICIAR JOGO           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -137,45 +152,281 @@ comando([]) :- nl,readChar.
 comando([A|AT]) :- write(A),write('|'),comando(AT).
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
-process(-1,A) :- /*write("Adeus| |\n|\t"),*/nl.
-process(32,A) :-jogada(A), readChar([]).
-%process(32,[]) :- readChar([]).
-process(9,A) :- jogada(A), readChar([]).
-%process(9,[]) :- readChar([]).
-process(10,A) :- jogada(A), readChar([]).
-%process(10,[]) :- readChar([]).
+process(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
+process(32,A) :-(jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(32,[]) :- readChar([]).
+process(9,A) :- (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(9,[]) :- readChar([]).
+process(10,A) :- (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(10,[]) :- readChar([]).
 process(C,[]) :- readChar([C]).
 process(C,T) :- append(T,[C],X), readChar(X).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %             JOGADAS             %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-get([H|_],0,H).
-get([_,T], Position, Elemento) :- NP is Position-1, get(T,NP,Elemento).
+%get([H|_],0,H).
+%get([_,T], Position, Elemento) :- NP is Position-1, get(T,NP,Elemento).
+change_color(87):-retract(cor(87)),asserta(cor(66)).
+change_color(66):-retract(cor(66)),asserta(cor(87)).
 
-
-jogada(A):- length(A, X), jogada(A,X), write('Length: '),write(A),nl.
-jogada([H|T],2) :- joga(H,T).
+jogada(A):- length(A, X), name(STR,A),write('>'), write(STR),nl, jogada(A,X).
+jogada([H,T],2) :- joga(H,T).
 jogada([P1,P2,P3],3) :-  joga(P1,P2,P3).
-jogada([P1,P2,P3,P4],4) :-  joga(P1,P2,P3,P4).
+jogada([P1,P2,P3,P4],4) :- joga(P1,P2,P3,P4).
 jogada([P1,P2,P3,P4,P5],5) :-  joga(P1,P2,P3,P4,P5).
-joga(A,B). % A desenvolver
-joga(Peca,X,Y). %A desenvolver
 
+joga(A,B):- AC is A-96,BC is B-48,cor(COR),name(P,[80,COR]),
+        (pos_act(P,X1,Y1), char_code(X1,X2), X3 is X2-64,      
+        regra([80,COR],[X3,Y1],[AC,BC],0),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(P,X1,Y)), asserta(pos_act(P,CD,BC)),
+        change_color(COR).
+
+joga(Peca,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
+        (pos_act(P,X1,Y1), char_code(X1,X2),X3 is X2-64,
+        regra([Peca,COR],[X3,Y1],[AC,BC],0),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC)),
+        change_color(COR).
+
+joga(79,45,79) :- cor(Cor), roque(Cor),
+        name(KP,[75,Cor]), name(RP,[82,Cor]),
+        pos_act(KP,'E',YK), pos_act(RP,'H',YR),
+        retract(pos_act(KP,'E',YK)), asserta(pos_act(KP,'G',YK)),
+        retract(pos_act(RP,'H',YR)), asserta(pos_act(RP,'F',YR)),
+        change_color(Cor).
+
+joga(P,120,X,Y):- (char_code(PL,P), peca(PL),
+        AC is X -96, BC is Y-48,cor(COR),name(Peca,[P,COR]),
+        (pos_act(Peca,X1,Y1), char_code(X1,X2),X3 is X2-64,
+        regra([P,COR],[X3,Y1],[AC,BC],1),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(_,CD,BC)),
+        retract(pos_act(Peca,X1,Y1)),asserta(pos_act(Peca,CD,BC))
+).
+/*
+joga(Peca,120,X,Y):- (AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
+        (pos_act(P,X1,Y1), char_code(X1,X2),X3 is X2-64,
+        regra([Peca,COR],[X3,Y1],[AC,BC],1),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(_,CD,BC)),
+        retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC)));
+        (AP is Peca-96, AC is X -96, BC is Y-48,cor(COR),name(P,[80,COR]),char_code(ALetra,AP),
+        write(ALetra),
+        (pos_act(P,ALetra,Y1), char_code(X1,X2),X3 is X2-64,
+        regra([80,COR],[X3,Y1],[AC,BC],1),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(_,CD,BC)),
+        retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC))),
+        change_color(COR).
+
+joga(XP,120,XC,Y):- AP is XP-96, AC is XC -96, BC is Y-48,cor(COR),name(P,[80,COR]),char_code(ALetra,AP),
+        write(ALetra),
+        (pos_act(P,ALetra,Y1), char_code(X1,X2),X3 is X2-64,
+        regra([80,COR],[X3,Y1],[AC,BC],1),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(_,CD,BC)),
+        retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC)),
+        change_color(COR).*/
+
+joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
+        XA is XP-32,char_code(LP,XA),
+        (pos_act(P,LP,Y1), char_code(LP,X2),X3 is X2-64,
+        regra([Peca,COR],[X3,Y1],[AC,BC],0),!),
+        AA is AC+64, char_code(CD,AA),
+        retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC)),
+        change_color(COR).
+
+joga(Peca,X,Y,A):- write('Exeção').
+joga(Peca,X,Y,A,B). %A desenvolver
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %            REGRAS               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Peao Branco
-regra([80,87],[XA,YA],[XD,YD],Accao):-
-        XA=XD, 
-        ((Z is YA-1, YD is Z,
-           char_code(Letra, XD),
-                \+ posicao_act(_,Letra,YD));
-        (YD = 5, YA = 7,
-         char_code(Letra, XD),
-         \+posicao_act(_,Letra,YD),
-        W is YD+1,!,
-        \+ posicao_act(_,Letra,W))),Accao is 0.
+% -- PEÃO BRANCO SEM COMER
+
+regra([80,87], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        Xantes = Xdepois, 
+        ((Z is Yantes+1, Ydepois=Z,
+        ASCII is 64+Xdepois, char_code(Letra, ASCII),
+        \+(pos_act(_, Letra, Ydepois))) ;
+        (Ydepois=4, Yantes=2, ASCII is 64+Xdepois,
+        char_code(Letra, ASCII), \+(pos_act(_, Letra, Ydepois)),
+        W is Ydepois-1, !, \+(pos_act(_, Letra, W)))),
+        Acao is 0.
+
+% -- PEÃO BRANCO A COMER
+
+regra([80, 87], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((X is Xantes + 1, X = Xdepois);
+        (X is Xantes - 1, X = Xdepois)),
+        Y is Yantes + 1, Y = Ydepois,
+        ASCII is 64 + Xdepois, char_code(Letra, ASCII),
+        pos_act(Peca, Letra, Ydepois),
+        name(P, [_,87]),
+        Acao is 1.
+
+% -- PEÃO PRETO SEM COMER
+
+regra([80,66], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        Xantes = Xdepois, 
+        ((Z is Yantes-1, Ydepois=Z,
+        ASCII is 64+Xdepois, char_code(Letra, ASCII),
+        \+(pos_act(_, Letra, Ydepois))) ;
+        (Ydepois=5, Yantes=7, ASCII is 64+Xdepois,
+        char_code(Letra, ASCII), \+(pos_act(_, Letra, Ydepois)),
+        W is Ydepois+1, !, \+(pos_act(_, Letra, W)))),
+        Acao is 0.
+
+% -- PEÃO PRETO A COMER
+
+regra([80,66], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((X is Xantes+1, X=Xdepois) ; (X is Xantes-1, X=Xdepois)),
+        Y is Yantes+1, Y=Ydepois, 
+        ASCII is 64+Xdepois, char_code(Letra, ASCII), 
+        pos_act(Peca, Letra, Ydepois),
+        name(Peca, [_, 66]), 
+        Acao is 1.
+
+% -- TORRE
+
+regra([82,Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :- 
+        ((var(Xdepois), (!, digito(Z), 
+        ((Xdepois is Xantes+Z, Ydepois is Yantes) ; 
+        (((Z=<Xantes, Xdepois is Xantes-Z) ;
+        (Z>Xantes, Xdepois is Z-Xantes)), Ydepois is Yantes) ;
+        (Ydepois is Yantes+Z, Xdepois is Xantes) ;
+        (((Z=<Yantes, Ydepois is Yantes-Z) ;
+        (Z>Yantes, Ydepois is Z-Yantes)), Xdepois is Xantes))),
+        Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ; 
+        (\+(var(Xdepois)), ((Xantes=Xdepois) ; 
+        (Yantes=Ydepois)))), ASCII is 64+Xdepois, 
+        char_code(Letra, ASCII), ((\+(pos_act(_, Letra, Ydepois)), 
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 0) ; 
+        (pos_act(Peca, Letra, Ydepois),
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 1)).
+
+% -- BISPO
+
+regra([66, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((var(Xdepois), (!, digito(Z),
+        ((Xdepois is Xantes+Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
+        (Xdepois is Xantes-Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)))),
+        Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ; 
+        (\+(var(Xdepois)), (Dif1 is abs(Xantes-Xdepois),
+        Dif2 is abs(Yantes-Ydepois),
+        Dif1=Dif2))), ASCII is 64+Xdepois, char_code(Letra, ASCII),
+        ((\+(pos_act(_, Letra, Ydepois)),
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 0) ; 
+        (pos_act(Peca, Letra, Ydepois),
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 1)).
+
+% -- REI
+
+regra([75, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((var(Xdepois),
+        ((Xdepois is Xantes+1, (Ydepois is Yantes+1 ; Ydepois is Yantes-1)) ;
+        (Xdepois is Xantes-1, (Ydepois is Yantes+1 ; Ydepois is Yantes-1)) ;
+        (Xdepois is Xantes+1, Ydepois is Yantes) ;
+        (Ydepois is Yantes+1, Xdepois is Xantes) ;
+        (Ydepois is Yantes-1, Xdepois is Xantes)),
+        (Xdepois is Xantes-1, Ydepois is Yantes) ;
+        Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ;
+        (\+(var(Xdepois)), ((Dif1 is abs(Xantes-Xdepois),
+        Dif2 is abs(Yantes-Ydepois), Dif1=Dif2, Dif1=1) ;
+        (Xantes=Xdepois,
+                ((Z is Yantes+1, Ydepois=Z) ; (Z is Yantes-1, Ydepois=Z))) ;
+        (Yantes=Ydepois, 
+                ((Z is Xantes+1, Xdepois=Z) ; (Z is Xantes-1, Xdepois=Z)))))),
+        ASCII is 64+Xdepois, char_code(Letra, ASCII),
+        ((\+(pos_act(_, Letra, Ydepois)), Acao is 0) ; 
+        (pos_act(Peca, Letra, Ydepois), Acao is 1)).
+
+% -- RAINHA
+
+regra([81, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((var(Xdepois), (!, digito(Z), 
+        ((Xdepois is Xantes+Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
+        (Xdepois is Xantes-Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
+        (Xdepois is Xantes+Z, Ydepois is Yantes) ; 
+        (((Z=<Xantes, Xdepois is Xantes-Z) ;
+        (Z>Xantes, Xdepois is Z-Xantes)), Ydepois is Yantes) ;
+        (Ydepois is Yantes+Z, Xdepois is Xantes) ;
+        (((Z=<Yantes, Ydepois is Yantes-Z) ; 
+        (Z>Yantes, Ydepois is Z-Yantes)), Xdepois is Xantes))),
+        Xdepois>0, Xdepois=<8, Yantes>0, Ydepois=<8) ; 
+        (\+(var(Xdepois)), ((Dif1 is abs(Xantes-Xdepois),
+        Dif2 is abs(Yantes-Ydepois), Dif1=Dif2) ;
+        (Xantes=Xdepois) ; (Yantes=Ydepois)))), ASCII is 64+Xdepois,
+        char_code(Letra, ASCII), ((\+(pos_act(_, Letra, Ydepois)),
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 0) ; 
+        (pos_act(Peca, Letra, Ydepois),
+        existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
+        Acao is 1)).
+
+% -- CAVALO
+
+regra([78, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
+        ((var(Xdepois), 
+        ((Z is Xantes+1, Xdepois=Z, (W is Yantes+2 ; W is Yantes-2), Ydepois=W) ;
+        (Z is Xantes+2, Xdepois=Z, (W is Yantes+1 ; W is Yantes-1), Ydepois=W) ;
+        (Z is Xantes-2, Xdepois=Z, (W is Yantes+1 ; W is Yantes-1), Ydepois=W) ;
+        (Z is Xantes-1, Xdepois=Z, (W is Yantes+1 ; W is Yantes-2)),
+        Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ;
+        (\+(var(Xdepois)), Dif1 is abs(Xantes-Xdepois),
+        Dif2 is abs(Yantes-Ydepois),
+        ((Dif1=1, Dif2=2) ; (Dif1=2, Dif2=1)))),
+        ASCII is 64+Xdepois, char_code(Letra, ASCII),
+        ((\+(pos_act(_, Letra, Ydepois)), Acao is 0) ;
+        (pos_act(Peca, Letra, Ydepois)),Acao is 1)).
+
+% -- ROQUE PRETO
+
+roque(66):- pos_act('KB','E',8),\+pos_act(_,'F',8),
+        \+pos_act(_,'G',8),pos_act('RB','H',8).
+% -- ROQUE BRANCO
+roque(87):- pos_act('KW','E',1),\+pos_act(_,'F',1),
+\+pos_act(_,'G',1),pos_act('RW','H',1).
+
+%//////////////////////////////////////////////////////////////////////////////////////
+%       VERIFICAR A EXISTENCIA DE PEÇAS PELO CAMINHO
+%//////////////////////////////////////////////////////////////////////////////////////
+% -- VERIFICAR NA COLUNA
+
+existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]) :-
+        \+(Yantes=Ydepois), ASCII is 64+Xantes, char_code(Letra, ASCII),
+        ((Ydepois>Yantes, Z is Yantes+1) ; (Ydepois<Yantes, Z is Yantes-1)),
+        (Z=Ydepois ; \+(pos_act(_, Letra, Z))),
+        existe_peca_no_caminho([Xantes, Z], [Xantes, Ydepois]).
+
+% -- VERIFICAR NA DIAGONAL
+
+existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]) :-
+        Dif1 is abs(Xantes-Xdepois), 
+        Dif2 is abs(Yantes-Ydepois), Dif1=Dif2,
+        ((Xdepois>Xantes, Z is Xantes+1) ; (Xdepois<Xantes, Z is Xantes-1)),
+        ((Ydepois>Yantes, W is Yantes+1) ; (Ydepois<Yantes, W is Yantes-1)),
+        ASCII is 64+Z, char_code(Letra, ASCII), 
+        ((W=Ydepois, Z=Xdepois) ; \+(pos_act(_, Letra, W))),
+        existe_peca_no_caminho([Z, W], [Xdepois, Ydepois]).
+
+% -- VERIFICAR NA LINHA
+
+existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]) :-
+        \+(Xantes=Xdepois), 
+        ((Xdepois>Xantes, Z is Xantes+1) ; (Xdepois<Xantes, Z is Xantes-1)),
+        ASCII is 64+Z, char_code(Letra, ASCII), 
+        (Z=Xdepois ; \+(pos_act(_, Letra, Yantes))),
+        existe_peca_no_caminho([Z, Yantes], [Xdepois, Yantes]).
+
+% -- VERIFICAR FIM
+
+existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]).
