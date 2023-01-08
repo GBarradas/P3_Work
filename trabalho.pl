@@ -68,7 +68,7 @@ peca('R').
 peca('P').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%        INICIAR TABULEIRO        %%%
+%%%                  INICIAR TABULEIRO                  %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- dynamic(pos_act/3).
 :- dynamic(cor/1).
@@ -170,7 +170,7 @@ process(10,[]) :- readChar([]).
 process(C,[]) :- readChar([C]).
 process(C,T) :- append(T,[C],X), readChar(X).
 
-print_info_play(A):- cor(Cor),write('  @'),((Cor=66,write('Black->'));(Cor=87,write('White->'))),
+print_info_play(A):- cor(Cor),write(' @'),((Cor=66,write('Preto->'));(Cor=87,write('BRANCO->'))),
         name(STR,A),write(STR),nl.
 
 readCharHide :- get0(Char),  processHide(Char,[]).
@@ -202,6 +202,8 @@ jogada([H,T],2) :- joga(H,T).
 jogada([P1,P2,P3],3) :-  joga(P1,P2,P3).
 jogada([P1,P2,P3,P4],4) :- joga(P1,P2,P3,P4).
 jogada([P1,P2,P3,P4,P5],5) :-  joga(P1,P2,P3,P4,P5).
+
+
 
 joga(A,B):- AC is A-96,BC is B-48,cor(COR),name(P,[80,COR]),
         (pos_act(P,X1,Y1), char_code(X1,X2), X3 is X2-64,      
@@ -253,7 +255,7 @@ joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         retract(pos_act(P,LP,Y1)),asserta(pos_act(P,CD,BC)),
         change_color(COR), retractall(cheque(_)).
 
-joga(Peca,X,Y,A):- write('Ocorreu um erro').
+joga(Peca,X,Y,A):- write('Ocorreu um erro!!').
 joga(Peca,X,Y,A,43):- joga(Peca,X,Y,A),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
 joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         XA is XP-32,char_code(LP,XA),
@@ -264,6 +266,8 @@ joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         retract(pos_act(P,X1,Y1)),
         asserta(pos_act(P,CD,BC)),
         change_color(COR), retractall(cheque(_)).
+
+
 %joga(Peca,X,Y,A,B):- cor(COR),change_color(COR), write('Por Implementar').
 
 
