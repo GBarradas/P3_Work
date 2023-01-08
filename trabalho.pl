@@ -98,7 +98,7 @@ jogar :- iniciar,asserta(cor(87)).
 
 desenhar :- desenhar_Tab(1),nl.
 
-desenhar_Tab(Linha):-(linhas(Z), Linha=<Z,
+desenhar_Tab(Linha):-write('    '),(linhas(Z), Linha=<Z,
         ((Y is Linha mod 2, Y=1, colunas(X), print_Linha(X), nl);
         (Y is Linha mod 2, Y=0, print_Col(Linha,2), nl)),
         LinhaN is Linha+1, desenhar_Tab(LinhaN)); !.
@@ -155,13 +155,15 @@ digito(X) :- (X=1;X=2;X=3;X=4;X=5;X=6;X=7).
 comando :- argument_list(Arg), comando(Arg).
 %comando(Arg) :- process_file.
 %comando([]) :- nl,readChar.
-comando(['algebrica','algebrica']) :- desenhar, readChar.
-comando(['algebrica','mostrar']) :- desenhar, readCharHide, desenhar.
-comando(['algebrica','estado']) :- readCharHide, desenhar, show_estado.
+comando(['algebrica','algebrica']) :- desenhar, readChar,print_separador, desenhar.
+comando(['algebrica','mostrar']) :- desenhar, readCharHide,print_separador, desenhar.
+comando(['algebrica','estado']) :- readCharHide, print_separador,desenhar,  show_estado.
 comando(_):- write('Argumentos Invalidos!!'),nl.
 show_estado:- ((cheque(X), write('O jogador '),((X=66,write('Preto'));(X=87, write('Branco'))),
 write(' esta em Cheque!!'));(write('Nenhum Jogador em Cheque'))),nl.
-
+print_separador:- write('#------------------------------------------#'),nl,
+                  write('#              TABULEIRO FINAL             #'),nl,
+                  write('#------------------------------------------#'),nl.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %        LER STANDART INPUT       %
@@ -170,16 +172,19 @@ write(' esta em Cheque!!'));(write('Nenhum Jogador em Cheque'))),nl.
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
 process(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
-process(32,A) :-name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(32,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(32,[]) :- readChar([]).
-process(46,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)), desenhar.
+process(46,A) :-  print_info_play(A),(jogada(A);\+jogada(A)), desenhar.
 process(46,_) :- desenhar.
-process(9,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(9,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(9,[]) :- readChar([]).
-process(10,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(10,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(10,[]) :- readChar([]).
 process(C,[]) :- readChar([C]).
 process(C,T) :- append(T,[C],X), readChar(X).
+
+print_info_play(A):- cor(Cor),write('@'),((Cor=66,write('Black->'));(Cor=87,write('White->'))),
+        name(STR,A),write(STR),nl.
 
 readCharHide :- get0(Char),  processHide(Char,[]).
 readCharHide(A) :- get0(Char),  processHide(Char,A).
@@ -326,13 +331,7 @@ regra([80,66], [Xantes, Yantes], [Xdepois, Ydepois], 1) :-
 
 regra([82,Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :- 
         existe_peca_no_caminho([Xantes, Yantes], [Xdepois, Ydepois]),
-        ((var(Xdepois), (!, digito(Z), 
-        ((Xdepois is Xantes+Z, Ydepois is Yantes) ; 
-        (((Z=<Xantes, Xdepois is Xantes-Z) ;
-        (Z>Xantes, Xdepois is Z-Xantes)), Ydepois is Yantes) ;
-        (Ydepois is Yantes+Z, Xdepois is Xantes) ;
-        (((Z=<Yantes, Ydepois is Yantes-Z) ;
-        (Z>Yantes, Ydepois is Z-Yantes)), Xdepois is Xantes))),
+        ((var(Xdepois),
         Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ; 
         (\+(var(Xdepois)), ((Xantes=Xdepois) ; 
         (Yantes=Ydepois)))), ASCII is 64+Xdepois, 
@@ -346,9 +345,7 @@ regra([82,Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
 % -- BISPO
 
 regra([66, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
-        ((var(Xdepois), (!, digito(Z),
-        ((Xdepois is Xantes+Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
-        (Xdepois is Xantes-Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)))),
+        ((var(Xdepois),
         Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ; 
         (\+(var(Xdepois)), (Dif1 is abs(Xantes-Xdepois),
         Dif2 is abs(Yantes-Ydepois),
@@ -364,12 +361,6 @@ regra([66, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
 
 regra([75, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
         ((var(Xdepois),
-        ((Xdepois is Xantes+1, (Ydepois is Yantes+1 ; Ydepois is Yantes-1)) ;
-        (Xdepois is Xantes-1, (Ydepois is Yantes+1 ; Ydepois is Yantes-1)) ;
-        (Xdepois is Xantes+1, Ydepois is Yantes) ;
-        (Ydepois is Yantes+1, Xdepois is Xantes) ;
-        (Ydepois is Yantes-1, Xdepois is Xantes)),
-        (Xdepois is Xantes-1, Ydepois is Yantes) ;
         Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ;
         (\+(var(Xdepois)), ((Dif1 is abs(Xantes-Xdepois),
         Dif2 is abs(Yantes-Ydepois), Dif1=Dif2, Dif1=1) ;
@@ -384,15 +375,7 @@ regra([75, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
 % -- RAINHA
 
 regra([81, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
-        ((var(Xdepois), (!, digito(Z), 
-        ((Xdepois is Xantes+Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
-        (Xdepois is Xantes-Z, (Ydepois is Yantes+Z ; Ydepois is Yantes-Z)) ;
-        (Xdepois is Xantes+Z, Ydepois is Yantes) ; 
-        (((Z=<Xantes, Xdepois is Xantes-Z) ;
-        (Z>Xantes, Xdepois is Z-Xantes)), Ydepois is Yantes) ;
-        (Ydepois is Yantes+Z, Xdepois is Xantes) ;
-        (((Z=<Yantes, Ydepois is Yantes-Z) ; 
-        (Z>Yantes, Ydepois is Z-Yantes)), Xdepois is Xantes))),
+        ((var(Xdepois),
         Xdepois>0, Xdepois=<8, Yantes>0, Ydepois=<8) ; 
         (\+(var(Xdepois)), ((Dif1 is abs(Xantes-Xdepois),
         Dif2 is abs(Yantes-Ydepois), Dif1=Dif2) ;
@@ -408,11 +391,7 @@ regra([81, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
 
 regra([78, Cor], [Xantes, Yantes], [Xdepois, Ydepois], Acao) :-
         ((var(Xdepois), 
-        ((Z is Xantes+1, Xdepois=Z, (W is Yantes+2 ; W is Yantes-2), Ydepois=W) ;
-        (Z is Xantes+2, Xdepois=Z, (W is Yantes+1 ; W is Yantes-1), Ydepois=W) ;
-        (Z is Xantes-2, Xdepois=Z, (W is Yantes+1 ; W is Yantes-1), Ydepois=W) ;
-        (Z is Xantes-1, Xdepois=Z, (W is Yantes+1 ; W is Yantes-2)),
-        Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ;
+        (Xdepois>0, Xdepois=<8, Ydepois>0, Ydepois=<8) ;
         (\+(var(Xdepois)), Dif1 is abs(Xantes-Xdepois),
         Dif2 is abs(Yantes-Ydepois),
         ((Dif1=1, Dif2=2) ; (Dif1=2, Dif2=1)))),
