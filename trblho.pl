@@ -141,14 +141,7 @@ espacoBoard(Pos, Max) :-
 
 ver_letra(Pos, Max) :-
     Max=<10, ((Y is Pos-4*Max, Y=3, !); (MaxN is Max+1, ver_letra(Pos,MaxN))).
-digito(X) :- 
-        (X=1;
-        X=2;
-        X=3;
-        X=4;
-        X=5;
-        X=6;
-        X=7).
+digito(X) :- (X=1;X=2;X=3;X=4;X=5;X=6;X=7).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          INICIAR JOGO           %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -162,22 +155,37 @@ digito(X) :-
 
 comando :- argument_list(Arg), comando(Arg).
 %comando(Arg) :- process_file.
-comando([]) :- nl,readChar.
-comando([A|AT]) :- write(A),write('|'),comando(AT).
+%comando([]) :- nl,readChar.
+comando(['algebrica','algebrica']) :- readChar.
+comando(['algebrica','mostrar']) :- readCharHide, desenhar.
 
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
 process(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
-process(32,A) :-(jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(32,A) :-name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(32,[]) :- readChar([]).
-process(46,A) :-(jogada(A);\+jogada(A)),desenhar, readChar([]).
-process(46,[]) :- readChar([]).
-process(9,A) :- (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(46,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)), desenhar.
+process(46,_) :- desenhar.
+process(9,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(9,[]) :- readChar([]).
-process(10,A) :- (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(10,A) :- name(STR,A),write(STR),nl, (jogada(A);\+jogada(A)),desenhar, readChar([]).
 process(10,[]) :- readChar([]).
 process(C,[]) :- readChar([C]).
 process(C,T) :- append(T,[C],X), readChar(X).
+
+readCharHide :- get0(Char),  processHide(Char,[]).
+readCharHide(A) :- get0(Char),  processHide(Char,A).
+processHide(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
+processHide(32,A) :-(jogada(A);\+jogada(A)), readCharHide([]).
+processHide(32,[]) :- readCharHide([]).
+processHide(46,A) :- (jogada(A);\+jogada(A)).
+processHide(46,_) :- nl.
+processHide(9,A) :- (jogada(A);\+jogada(A)), readCharHide([]).
+processHide(9,[]) :- readCharHide([]).
+processHide(10,A) :- (jogada(A);\+jogada(A)), readCharHide([]).
+processHide(10,[]) :- readCharHide([]).
+processHide(C,[]) :- readCharHide([C]).
+processHide(C,T) :- append(T,[C],X), readCharHide(X).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %             JOGADAS             %
@@ -187,9 +195,9 @@ process(C,T) :- append(T,[C],X), readChar(X).
 change_color(87):-retract(cor(87)),asserta(cor(66)).
 change_color(66):-retract(cor(66)),asserta(cor(87)).
 
-jogada(A):- length(A, X), name(STR,A),write('>'),
-cor(Cor),((Cor=66,write('Black->'));(Cor=87,write('White->'))),
- write(STR),nl, jogada(A,X).
+jogada(A):- length(A, X), name(STR,A),cor(Cor),
+%write('>'),((Cor=66,write('Black->'));(Cor=87,write('White->'))),write(STR),nl,
+jogada(A,X).
 jogada([H,T],2) :- joga(H,T).
 jogada([P1,P2,P3],3) :-  joga(P1,P2,P3).
 jogada([P1,P2,P3,P4],4) :- joga(P1,P2,P3,P4).
@@ -234,7 +242,7 @@ joga(P,120,X,Y):- ((char_code(PL,P), peca(PL),
         ,change_color(COR).
 
 joga(P,X,Y,43):- joga(P,X,Y).
-
+joga(P,X,Y,35):- joga(P,X,Y).
 
 joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         XA is XP-32,char_code(LP,XA),
@@ -244,9 +252,9 @@ joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         retract(pos_act(P,LP,Y1)),asserta(pos_act(P,CD,BC)),
         change_color(COR).
 
-joga(Peca,X,Y,A):- write('Ocurreu um erro').
+joga(Peca,X,Y,A):- write('Ocorreu um erro').
 joga(Peca,X,Y,A,43):- joga(Peca,X,Y,A).
-joga(Peca,XP,120,X,Y):- write('VERIFICAR AQUI'),AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
+joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         XA is XP-32,char_code(LP,XA),
         (pos_act(P,LP,Y1), char_code(LP,X2),X3 is X2-64,
         regra([Peca,COR],[X3,Y1],[AC,BC],1),!),
@@ -255,7 +263,7 @@ joga(Peca,XP,120,X,Y):- write('VERIFICAR AQUI'),AC is X -96, BC is Y-48,cor(COR)
         retract(pos_act(P,X1,Y1)),
         asserta(pos_act(P,CD,BC)),
         change_color(COR).
-joga(Peca,X,Y,A,B):- cor(COR),change_color(COR), write('Por Implementar').
+%joga(Peca,X,Y,A,B):- cor(COR),change_color(COR), write('Por Implementar').
 
 
 
