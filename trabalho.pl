@@ -1,22 +1,14 @@
-% tipologia descritiva
-/*
-coluna('A').
-coluna('B').
-coluna('C').
-coluna('D').
-coluna('E').
-coluna('F').
-coluna('G').
-coluna('H'). 
-linha(1).
-linha(2).
-linha(3).
-linha(4).
-linha(5).
-linha(6).
-linha(7).
-linha(8).
-celula(X,Y) :- coluna(X), linha(Y).*/
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                                                     %%%
+%%%                    XADREX PROLOG                    %%%
+%%%                UNIVERSIDADE DE ÉVORA                %%%
+%%%                U.C. PROGRAMAÇÃO III                 %%%
+%%%               DOCENTE: Salvador Abreu               %%%
+%%%                     DISCENTES:                      %%%
+%%%           André Baião & Gonçalo Barradas            %%%
+%%%                                                     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 imprimir('RB',' ♜').
 imprimir('NB',' ♞').
 imprimir('BB',' ♝').
@@ -66,12 +58,7 @@ posicao_inicial('NW', 'G', 1).
 posicao_inicial('RW', 'H', 1).
 linhas(19).
 colunas(37).
-valor(80, 100).
-valor(66, 325).
-valor(72, 325).
-valor(84, 500).
-valor(81, 1000).
-valor(75, 20000).
+
 
 peca('Q').
 peca('K').
@@ -80,9 +67,9 @@ peca('N').
 peca('R').
 peca('P').
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        INICIAR TABULEIRO        %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%        INICIAR TABULEIRO        %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- dynamic(pos_act/3).
 :- dynamic(cor/1).
 :- dynamic(cheque/1).
@@ -90,9 +77,9 @@ peca('P').
 iniciar :- (posicao_inicial(P, X, Y),\+pos_act(P,X,Y),
         asserta(pos_act(P, X, Y)),iniciar);!.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       DESENHAR TABULEIRO        %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                 DESENHAR TABULEIRO                  %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 jogar :- iniciar,asserta(cor(87)).
 
@@ -142,10 +129,10 @@ espacoBoard(Pos, Max) :-
 
 ver_letra(Pos, Max) :-
     Max=<10, ((Y is Pos-4*Max, Y=3, !); (MaxN is Max+1, ver_letra(Pos,MaxN))).
-digito(X) :- (X=1;X=2;X=3;X=4;X=5;X=6;X=7).
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%          INICIAR JOGO           %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                    INICIAR JOGO                     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 :- initialization(jogar).
@@ -165,44 +152,44 @@ print_separador:- write('#------------------------------------------#'),nl,
                   write('#              TABULEIRO FINAL             #'),nl,
                   write('#------------------------------------------#'),nl.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        LER STANDART INPUT       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                  LER STANDART INPUT                 %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
 process(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
-process(32,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(32,A) :- print_info_play(A), jogada(A),desenhar, readChar([]).
 process(32,[]) :- readChar([]).
-process(46,A) :-  print_info_play(A),(jogada(A);\+jogada(A)), desenhar.
+process(46,A) :-  print_info_play(A),jogada(A), desenhar.
 process(46,_) :- desenhar.
-process(9,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(9,A) :- print_info_play(A), jogada(A),desenhar, readChar([]).
 process(9,[]) :- readChar([]).
-process(10,A) :- print_info_play(A), (jogada(A);\+jogada(A)),desenhar, readChar([]).
+process(10,A) :- print_info_play(A), jogada(A),desenhar, readChar([]).
 process(10,[]) :- readChar([]).
 process(C,[]) :- readChar([C]).
 process(C,T) :- append(T,[C],X), readChar(X).
 
-print_info_play(A):- cor(Cor),write('@'),((Cor=66,write('Black->'));(Cor=87,write('White->'))),
+print_info_play(A):- cor(Cor),write('  @'),((Cor=66,write('Black->'));(Cor=87,write('White->'))),
         name(STR,A),write(STR),nl.
 
 readCharHide :- get0(Char),  processHide(Char,[]).
 readCharHide(A) :- get0(Char),  processHide(Char,A).
-processHide(-1,_) :- nl.
-processHide(32,A) :-(jogada(A);\+jogada(A)), readCharHide([]).
+processHide(-1,_).
+processHide(32,A) :-jogada(A), readCharHide([]).
 processHide(32,[]) :- readCharHide([]).
-processHide(46,A) :- (jogada(A);\+jogada(A)).
-processHide(46,_) :- nl.
-processHide(9,A) :- (jogada(A);\+jogada(A)), readCharHide([]).
+processHide(46,A) :- jogada(A).
+processHide(46,_).
+processHide(9,A) :- jogada(A), readCharHide([]).
 processHide(9,[]) :- readCharHide([]).
-processHide(10,A) :- (jogada(A);\+jogada(A)), readCharHide([]).
+processHide(10,A) :- jogada(A), readCharHide([]).
 processHide(10,[]) :- readCharHide([]).
 processHide(C,[]) :- readCharHide([C]).
 processHide(C,T) :- append(T,[C],X), readCharHide(X).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%             JOGADAS             %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                       JOGADAS                       %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %get([H|_],0,H).
 %get([_,T], Position, Elemento) :- NP is Position-1, get(T,NP,Elemento).
 change_color(87):-retract(cor(87)),asserta(cor(66)).
@@ -281,9 +268,9 @@ joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%            REGRAS               %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%                      REGRAS                         %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % -- PEÃO BRANCO SEM COMER
 
 regra([80,87], [Xantes, Yantes], [Xdepois, Ydepois], 0) :-
@@ -407,9 +394,10 @@ roque(66):- pos_act('KB','E',8),\+pos_act(_,'F',8),
 roque(87):- pos_act('KW','E',1),\+pos_act(_,'F',1),
 \+pos_act(_,'G',1),pos_act('RW','H',1).
 
-%//////////////////////////////////////////////////////////////////////////////////////
-%       VERIFICAR A EXISTENCIA DE PEÇAS PELO CAMINHO
-%//////////////////////////////////////////////////////////////////////////////////////
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%    VERIFICAR A EXISTENCIA DE PEÇAS PELO CAMINHO     %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % -- VERIFICAR NA COLUNA
 
 existe_peca_no_caminho([Xantes, Yantes], [Xantes, Ydepois]) :-
