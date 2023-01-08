@@ -85,6 +85,7 @@ peca('P').
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- dynamic(pos_act/3).
 :- dynamic(cor/1).
+:- dynamic(cheque/1).
 
 iniciar :- (posicao_inicial(P, X, Y),\+pos_act(P,X,Y),
         asserta(pos_act(P, X, Y)),iniciar);!.
@@ -93,7 +94,7 @@ iniciar :- (posicao_inicial(P, X, Y),\+pos_act(P,X,Y),
 %       DESENHAR TABULEIRO        %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-jogar :- iniciar,asserta(cor(87)), desenhar.
+jogar :- iniciar,asserta(cor(87)).
 
 desenhar :- desenhar_Tab(1),nl.
 
@@ -147,17 +148,24 @@ digito(X) :- (X=1;X=2;X=3;X=4;X=5;X=6;X=7).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%        LER STANDART INPUT       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- initialization(jogar).
 :- initialization(comando).
+
 
 comando :- argument_list(Arg), comando(Arg).
 %comando(Arg) :- process_file.
 %comando([]) :- nl,readChar.
-comando(['algebrica','algebrica']) :- readChar.
-comando(['algebrica','mostrar']) :- readCharHide, desenhar.
+comando(['algebrica','algebrica']) :- desenhar, readChar.
+comando(['algebrica','mostrar']) :- desenhar, readCharHide, desenhar.
+comando(['algebrica','estado']) :- readCharHide, desenhar, show_estado.
+comando(_):- write('Argumentos Invalidos!!'),nl.
+show_estado:- ((cheque(X), write('O jogador '),((X=66,write('Preto'));(X=87, write('Branco'))),
+write(' esta em Cheque!!'));(write('Nenhum Jogador em Cheque'))),nl.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%        LER STANDART INPUT       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 readChar :- get0(Char),  process(Char,[]).
 readChar(A) :- get0(Char),  process(Char,A).
@@ -175,7 +183,7 @@ process(C,T) :- append(T,[C],X), readChar(X).
 
 readCharHide :- get0(Char),  processHide(Char,[]).
 readCharHide(A) :- get0(Char),  processHide(Char,A).
-processHide(-1,_) :- /*write("Adeus| |\n|\t"),*/nl.
+processHide(-1,_) :- nl.
 processHide(32,A) :-(jogada(A);\+jogada(A)), readCharHide([]).
 processHide(32,[]) :- readCharHide([]).
 processHide(46,A) :- (jogada(A);\+jogada(A)).
@@ -208,22 +216,23 @@ joga(A,B):- AC is A-96,BC is B-48,cor(COR),name(P,[80,COR]),
         regra([80,COR],[X3,Y1],[AC,BC],0),!),
         AA is AC+64, char_code(CD,AA),
         retract(pos_act(P,X1,Y)), asserta(pos_act(P,CD,BC)),
-        change_color(COR).
+        change_color(COR), retractall(cheque(_)).
 
+joga(X,Y,43) :- joga(X,Y),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
+joga(X,Y,35) :- joga(X,Y),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
 joga(Peca,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         (pos_act(P,X1,Y1), char_code(X1,X2),X3 is X2-64,
         regra([Peca,COR],[X3,Y1],[AC,BC],0),!),
         AA is AC+64, char_code(CD,AA),
         retract(pos_act(P,X1,Y1)),asserta(pos_act(P,CD,BC)),
-        change_color(COR).
+        change_color(COR), retractall(cheque(_)).
 
 joga(79,45,79) :- cor(Cor), roque(Cor),
         name(KP,[75,Cor]), name(RP,[82,Cor]),
         pos_act(KP,'E',YK), pos_act(RP,'H',YR),
         retract(pos_act(KP,'E',YK)), asserta(pos_act(KP,'G',YK)),
         retract(pos_act(RP,'H',YR)), asserta(pos_act(RP,'F',YR)),
-        change_color(Cor).
-joga(X,Y,43) :- joga(X,Y).
+        change_color(Cor), retractall(cheque(_)).
 joga(P,120,X,Y):- ((char_code(PL,P), peca(PL),
         AC is X -96, BC is Y-48,cor(COR),name(Peca,[P,COR]),
         (pos_act(Peca,X1,Y1), char_code(X1,X2),X3 is X2-64,
@@ -239,10 +248,10 @@ joga(P,120,X,Y):- ((char_code(PL,P), peca(PL),
         (retract(pos_act(_,FD,BC));retract(pos_act(_,FD,YA))),
         retract(pos_act(Peca,L,YA)),asserta(pos_act(Peca,FD,BC))
         ))
-        ,change_color(COR).
+        ,change_color(COR), retractall(cheque(_)).
 
-joga(P,X,Y,43):- joga(P,X,Y).
-joga(P,X,Y,35):- joga(P,X,Y).
+joga(P,X,Y,43):- joga(P,X,Y),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
+joga(P,X,Y,35):- joga(P,X,Y),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
 
 joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         XA is XP-32,char_code(LP,XA),
@@ -250,10 +259,10 @@ joga(Peca,XP,X,Y):-  AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         regra([Peca,COR],[X3,Y1],[AC,BC],0),!),
         AA is AC+64, char_code(CD,AA),
         retract(pos_act(P,LP,Y1)),asserta(pos_act(P,CD,BC)),
-        change_color(COR).
+        change_color(COR), retractall(cheque(_)).
 
 joga(Peca,X,Y,A):- write('Ocorreu um erro').
-joga(Peca,X,Y,A,43):- joga(Peca,X,Y,A).
+joga(Peca,X,Y,A,43):- joga(Peca,X,Y,A),cor(COR),((COR=66, asserta(cheque(87)));(Cor=87, asserta(cheque(66)))).
 joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         XA is XP-32,char_code(LP,XA),
         (pos_act(P,LP,Y1), char_code(LP,X2),X3 is X2-64,
@@ -262,7 +271,7 @@ joga(Peca,XP,120,X,Y):- AC is X -96, BC is Y-48,cor(COR),name(P,[Peca,COR]),
         retract(pos_act(_,CD,BC)),
         retract(pos_act(P,X1,Y1)),
         asserta(pos_act(P,CD,BC)),
-        change_color(COR).
+        change_color(COR), retractall(cheque(_)).
 %joga(Peca,X,Y,A,B):- cor(COR),change_color(COR), write('Por Implementar').
 
 
